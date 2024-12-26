@@ -76,7 +76,7 @@ jobs:
 
       # Set up Python and run all tests
       - name: Run all tests
-      working-directory: app/backend
+        working-directory: app/backend
         run: |
           python -m venv .venv
           source .venv/bin/activate
