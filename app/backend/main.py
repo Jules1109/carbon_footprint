@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import numpy as np
 import onnxruntime as ort
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 # Load the ONNX model
 try:
@@ -17,6 +20,14 @@ class PredictionRequest(BaseModel):
 
 # Initialize the FastAPI app
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
