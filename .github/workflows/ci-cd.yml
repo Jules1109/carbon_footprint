@@ -11,36 +11,37 @@ on:
       - main
 
 jobs:
-  # Step 1: On Pull Request to Dev Branch
+  # Step 1: Build and Test on Pull Request to Dev
   build-and-test:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install dependencies
+      # Navigate to the backend directory and install dependencies
+      - name: Install backend dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r app/backend/requirements.txt
+          pip install --no-cache-dir -r requirements.txt
 
-      - name: Build Docker image
-        run: docker build -t carbon_pred_backend .
-
+      # Run integration tests
       - name: Run integration tests
         run: |
-          pytest tests/integration --maxfail=1 --disable-warnings
+          source venv/bin/activate
+          pytest tests/test_api.py
         env:
           BASE_URL: http://127.0.0.1:8000
 
-  # Step 2: On Push to Dev -> Staging
+  # Step 2: Push Dev to Staging
   push-to-staging:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
@@ -52,7 +53,7 @@ jobs:
       - name: Push to staging branch
         run: git push origin dev:staging
 
-  # Step 3: On Push to Staging
+  # Step 3: Build and Test on Staging
   staging-tests:
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
@@ -61,17 +62,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build Docker image
-        run: docker build -t carbon_pred_backend .
-
+      # Set up Python and run all tests
       - name: Run all tests
         run: |
-          pytest tests --maxfail=1 --disable-warnings
+          python -m venv venv
+          source venv/bin/activate
+          pip install --no-cache-dir -r requirements.txt
+          pytest tests/test_api.py
 
       - name: Push to production
         run: git push origin staging:main
 
-  # Step 4: On Push to Main
+  # Step 4: Deploy on Main
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -80,15 +82,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Build Docker image
       - name: Build Docker image
+        working-directory: app/backend
         run: docker build -t carbon_pred_backend .
 
+      # Push Docker image to DockerHub
       - name: Push Docker image to DockerHub
         run: |
           echo "${{ secrets.DOCKER_USERNAME }}" | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker tag carbon_pred_backend ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
 
+      # Deploy to production (customize this section for your cloud platform)
       - name: Deploy to production
         run: |
-          echo "Deploying to cloud platform (add platform-specific deployment here)"
+          echo "Deploying to cloud platform (e.g., AWS, GCP, Azure, etc.)"
