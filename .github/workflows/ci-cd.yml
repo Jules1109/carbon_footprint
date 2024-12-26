@@ -37,7 +37,7 @@ jobs:
       # Run integration tests
       - name: Run integration tests
         run: |
-          source venv/bin/activate
+          source .venv/bin/activate
           pytest tests/test_api.py
         env:
           BASE_URL: http://127.0.0.1:8000
