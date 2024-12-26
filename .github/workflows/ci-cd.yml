@@ -67,8 +67,8 @@ jobs:
        # run: git fetch origin staging
       - name: configure git user
         run: |
-        git config --global user.name "Jules1109"
-        git config --global user.email "jules-edaourd.abouem-dickoum@efrei.net"
+          git config --global user.name "Jules1109"
+          git config --global user.email "jules-edaourd.abouem-dickoum@efrei.net"
     # Merge staging into dev to avoid conflicts
       - name: Merge staging into dev
         run: |
