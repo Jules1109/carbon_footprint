@@ -30,8 +30,8 @@ jobs:
       # Navigate to the backend directory and install dependencies
       - name: Install backend dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m venv .venv
+          source .venv/bin/activate
           pip install --no-cache-dir -r requirements.txt
 
       # Run integration tests
@@ -66,8 +66,8 @@ jobs:
       # Set up Python and run all tests
       - name: Run all tests
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          python -m venv .venv
+          source .venv/bin/activate
           pip install --no-cache-dir -r requirements.txt
           pytest tests/test_api.py
 
