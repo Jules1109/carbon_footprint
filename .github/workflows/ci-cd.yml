@@ -85,7 +85,7 @@ jobs:
 
   # Step 3: Build and Test on Staging
   staging-tests:
-    if: startsWith(github.ref == 'refs/heads/staging')
+    if: startsWith(github.ref , 'refs/heads/staging')
     runs-on: ubuntu-latest
 
     steps:
