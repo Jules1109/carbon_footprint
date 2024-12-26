@@ -9,7 +9,8 @@ on:
       - dev
       - staging
       - main
-
+permissions:
+  contents: write 
 jobs:
   # Step 1: Build and Test on Pull Request to Dev
   build-and-test:
