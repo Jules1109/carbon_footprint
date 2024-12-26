@@ -69,8 +69,7 @@ jobs:
     # Merge staging into dev to avoid conflicts
       - name: Merge staging into dev
         run: |
-          git checkout dev
-          git merge origin/staging --no-edit --allow-unrelated-histories
+          git merge origin staging --no-edit --allow-unrelated-histories
 
     # Push the updated dev branch to staging
       - name: Push to staging branch
