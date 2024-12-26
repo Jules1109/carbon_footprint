@@ -95,18 +95,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Build Docker image
-      - name: Build Docker image
-        working-directory: app/backend
-        run: docker build -t carbon_pred_backend .
-
+      # login to docker hub
+      - name: login to docker 
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
       # Push Docker image to DockerHub
-      - name: Push Docker image to DockerHub
+      - name: Build and push Docker image
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker tag carbon_pred_backend ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
-
       # Deploy to production (customize this section for your cloud platform)
       - name: Deploy to production
         run: |
