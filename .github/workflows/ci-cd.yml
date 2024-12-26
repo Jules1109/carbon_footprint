@@ -62,12 +62,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Push to staging branch
+    # Fetch the latest changes from the remote
+      - name: Fetch latest changes
+        run: git fetch origin staging
+
+    # Merge staging into dev to avoid conflicts
+      - name: Merge staging into dev
         run: |
-          git fetch origin
           git checkout dev
-          git pull origin dev
-          git push origin dev:staging
+          git merge origin/staging --no-edit
+
+    # Push the updated dev branch to staging
+      - name: Push to staging branch
+        run: git push origin dev:staging    
 
   # Step 3: Build and Test on Staging
   staging-tests:
