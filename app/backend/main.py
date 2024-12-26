@@ -45,3 +45,5 @@ def predict(request: PredictionRequest):
             status_code=500,
             detail=f"Internal server error: {str(e)}"
         )
+
+#my test1
