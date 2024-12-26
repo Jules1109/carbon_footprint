@@ -89,6 +89,7 @@ jobs:
   # Step 4: Deploy on Main
   deploy:
     if: github.ref == 'refs/heads/main'
+    needs: staging-tests
     runs-on: ubuntu-latest
 
     steps:
@@ -103,10 +104,11 @@ jobs:
           password: ${{secrets.DOCKER_PASSWORD}}
       # Push Docker image to DockerHub
       - name: Build and push Docker image
+        working-directory: app/backend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
-      # Deploy to production (customize this section for your cloud platform)
+      # Deploy to production (customize this section for your cloud platform
       - name: Deploy to production
         run: |
           echo "Deploying to cloud platform (e.g., AWS, GCP, Azure, etc.)"
