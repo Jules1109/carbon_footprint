@@ -25,5 +25,3 @@ input_name = session.get_inputs()[0].name
 predictions = session.run(None, {input_name: data})
 
 print(f"Prédictions : {predictions[0]}")
-
-#this is a test
