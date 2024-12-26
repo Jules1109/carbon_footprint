@@ -29,6 +29,7 @@ jobs:
 
       # Navigate to the backend directory and install dependencies
       - name: Install backend dependencies
+        working-directory: app/backend
         run: |
           python -m venv .venv
           source .venv/bin/activate
@@ -36,6 +37,7 @@ jobs:
 
       #start server 
       - name: Start API server 
+        working-directory: app/backend
         run:  |
           source .venv/bin/activate
           uvicorn main:app --host 0.0.0.0 --port 8000
@@ -44,8 +46,9 @@ jobs:
 
       # Run integration tests
       - name: Run integration tests
+        working-directory: test/
         run: |
-          source .venv/bin/activate
+          source ../app/backend/venv/bin/activate
           pytest tests/test_api.py
         env:
           BASE_URL: http://127.0.0.1:8000
