@@ -76,11 +76,12 @@ jobs:
 
       # Set up Python and run all tests
       - name: Run all tests
+      working-directory: app/backend
         run: |
           python -m venv .venv
           source .venv/bin/activate
           pip install --no-cache-dir -r requirements.txt
-          pytest tests/test_api.py
+          pytest ../../tests/test_api.py
 
       - name: Push to production
         run: git push origin staging:main
@@ -102,7 +103,7 @@ jobs:
       # Push Docker image to DockerHub
       - name: Push Docker image to DockerHub
         run: |
-          echo "${{ secrets.DOCKER_USERNAME }}" | docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker tag carbon_pred_backend ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
 
