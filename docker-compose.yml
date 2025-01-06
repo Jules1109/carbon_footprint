@@ -1,22 +1,23 @@
 version: '3.8'
-
 services:
   backend:
     build:
-      context: app/backend
-      dockerfile: Dockerfile
+      context: app/backend/
+      dockerfile: ./Dockerfile
+    restart: always
     ports:
-      - "8000:8000"
-    container_name: carbon_pred_backend
+      - "127.0.0.1:8000:8000"
+    expose:
+      - 8000
 
   frontend:
+    env_file:
+      - app/frontend/.env
     build:
-      context: app/frontend
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_BACKEND_URL: "http://localhost:8000" 
+      context: app/frontend/
+      dockerfile: ./Dockerfile
+    restart: always
     ports:
-      - "3000:3000"
-    container_name: carbon_pred_frontend
-    depends_on:
-      - backend
+      - "127.0.0.1:3000:3000"
+    expose:
+      - 3000
