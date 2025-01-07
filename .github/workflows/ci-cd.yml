@@ -61,7 +61,7 @@ jobs:
 
       # Install Cypress dependencies
       - name: Install frontend dependencies
-        working-directory: app/rontend
+        working-directory: app/frontend
         run: npm install
 
       # Run Cypress tests
@@ -123,12 +123,12 @@ jobs:
 
       # Install Cypress dependencies
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: app/frontend
         run: npm install
 
       # Run Cypress tests
       - name: Run Cypress tests
-        working-directory: frontend
+        working-directory: app/frontend
         run: npx cypress run
 
       # Push to production
