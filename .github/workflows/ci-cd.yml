@@ -35,14 +35,14 @@ jobs:
           source .venv/bin/activate
           pip install  -r requirements.txt
 
-      #start server 
+      # Start API server 
       - name: Start API server 
         working-directory: app/backend
         run:  |
           source .venv/bin/activate
           uvicorn main:app --host 0.0.0.0 --port 8000 &
         env:
-          BASE_URL: hhtp://127.0.0.1:8000  
+          BASE_URL: http://127.0.0.1:8000  
 
       # Run integration tests
       - name: Run integration tests
@@ -53,6 +53,22 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:8000
 
+      # Install Node.js for Cypress tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install Cypress dependencies
+      - name: Install frontend dependencies
+        working-directory: app/rontend
+        run: npm install
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: app/frontend
+        run: npx cypress run
+
   # Step 2: Push Dev to Staging
   push-to-staging:
     if: github.ref == 'refs/heads/dev'
@@ -62,14 +78,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-    # Fetch the latest changes from the remote
-     # - name: Fetch latest changes
-       # run: git fetch origin staging
-      - name: configure git user
+      # Configure git user
+      - name: Configure git user
         run: |
           git config --global user.name "Jules1109"
           git config --global user.email "jules-edaourd.abouem-dickoum@efrei.net"
-    # Merge staging into dev to avoid conflicts
+
+      # Merge staging into dev to avoid conflicts
       - name: Merge staging into dev
         run: |
           git fetch origin
@@ -78,14 +93,13 @@ jobs:
           git add .
           git commit -m "Resolved conflicts during merge from staging to dev" || true
 
-
-    # Push the updated dev branch to staging
+      # Push the updated dev branch to staging
       - name: Push to staging branch
         run: git push origin dev:staging    
 
   # Step 3: Build and Test on Staging
   staging-tests:
-    if: startsWith(github.ref , 'refs/heads/staging')
+    if: startsWith(github.ref, 'refs/heads/staging')
     runs-on: ubuntu-latest
 
     steps:
@@ -101,6 +115,23 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           pytest ../../tests/test_api.py
 
+      # Install Node.js for Cypress tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install Cypress dependencies
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: frontend
+        run: npx cypress run
+
+      # Push to production
       - name: Push to production
         run: git push origin staging:main
 
@@ -114,19 +145,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # login to docker hub
-      - name: login to docker 
+      # Login to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{secrets.DOCKER_USERNAME}}
           password: ${{secrets.DOCKER_PASSWORD}}
+
       # Push Docker image to DockerHub
       - name: Build and push Docker image
         working-directory: app/backend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
-      # Deploy to production (customize this section for your cloud platform
+
+      # Deploy to production
       - name: Deploy to production
         run: |
           echo "Deploying to cloud platform (e.g., AWS, GCP, Azure, etc.)"
