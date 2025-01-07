@@ -113,14 +113,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Python and run all tests
-      - name: Run all tests
+      - name: Install backend dependencies
         working-directory: app/backend
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          pip install --no-cache-dir -r requirements.txt
+          pip install  -r requirements.txt  
+
+      - name: Start API server 
+        working-directory: app/backend
+        run:  |
+          source .venv/bin/activate
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+        env:
+          BASE_URL: http://127.0.0.1:8000  
+
+      # Set up Python and run all tests
+      - name: Run all tests
+        working-directory: app/backend
+        run: |
+          source .venv/bin/activate
           pytest ../../tests/test_api.py
+        env:
+          BASE_URL: http://127.0.0.1:8000  
 
       # Install Node.js for Cypress tests
       - name: Set up Node.js
@@ -132,6 +147,12 @@ jobs:
       - name: Install frontend dependencies
         working-directory: app/frontend
         run: npm install
+
+      - name: start frontend server 
+        working-directory: app/frontend
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000  
 
       # Run Cypress tests
       - name: Run Cypress tests
