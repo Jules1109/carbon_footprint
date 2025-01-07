@@ -64,6 +64,13 @@ jobs:
         working-directory: app/frontend
         run: npm install
 
+      -name: start frontend server 
+        working-directory: app/frontend
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000
+  
+
       # Run Cypress tests
       - name: Run Cypress tests
         working-directory: app/frontend
