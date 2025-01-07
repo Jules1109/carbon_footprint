@@ -159,10 +159,6 @@ jobs:
         working-directory: app/frontend
         run: npx cypress run
 
-      # Push to production
-      - name: Push to production
-        run: git push origin staging:main
-
   # Step 4: Deploy on Main
   deploy:
     if: github.ref == 'refs/heads/main'
@@ -181,11 +177,18 @@ jobs:
           password: ${{secrets.DOCKER_PASSWORD}}
 
       # Push Docker image to DockerHub
-      - name: Build and push Docker image
+      - name: Build and push backend
         working-directory: app/backend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
+
+       - name: Build and push frontend
+        working-directory: app/frontend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_frontend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_frontend:latest
+   
 
       # Deploy to production
       - name: Deploy to production
