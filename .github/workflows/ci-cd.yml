@@ -64,7 +64,7 @@ jobs:
         working-directory: app/frontend
         run: npm install
 
-      -name: start frontend server 
+      - name: start frontend server 
         working-directory: app/frontend
         run: |
           npm start &
