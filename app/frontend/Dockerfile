@@ -1,5 +1,5 @@
 # Use the latest LTS version of Node.js
-FROM node:18-alpine AS build
+FROM node:18-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -16,14 +16,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Use a lightweight web server for production
-FROM nginx:stable-alpine
+# Install `serve` to serve the production build
+RUN npm install -g serve
 
-# Copy the build output to the Nginx HTML directory
-COPY --from=build /app/build /usr/share/nginx/html
+# Expose the port your app runs on
+EXPOSE 3000
 
-# Expose the port Nginx runs on
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Command to serve the application
+CMD ["npx", "serve", "-s", "build", "-l", "3000"]
