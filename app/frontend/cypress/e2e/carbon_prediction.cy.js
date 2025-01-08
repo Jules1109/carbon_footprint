@@ -1,7 +1,7 @@
 describe('Carbon Emission Predictor', () => {
     it('should make a successful prediction', () => {
       // Step 1: Visiter l'application frontend
-      cy.visit('https://jules1109.github.io/carbon_footprint/');
+      cy.visit('http://localhost:3000');
   
       // Step 2: Remplir le formulaire
       cy.get('input[name="obfcmConsumption"]').type('6.8');
