@@ -1,0 +1,195 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - dev
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+permissions:
+  contents: write 
+jobs:
+  # Step 1: Build and Test on Pull Request to Dev
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # Navigate to the backend directory and install dependencies
+      - name: Install backend dependencies
+        working-directory: app/backend
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install  -r requirements.txt
+
+      # Start API server 
+      - name: Start API server 
+        working-directory: app/backend
+        run:  |
+          source .venv/bin/activate
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+        env:
+          BASE_URL: http://127.0.0.1:8000  
+
+      # Run integration tests
+      - name: Run integration tests
+        working-directory: app/backend
+        run: |
+          source .venv/bin/activate
+          pytest ../../tests/test_api.py
+        env:
+          BASE_URL: http://127.0.0.1:8000
+
+      # Install Node.js for Cypress tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install Cypress dependencies
+      - name: Install frontend dependencies
+        working-directory: app/frontend
+        run: npm install
+
+      - name: start frontend server 
+        working-directory: app/frontend
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000
+  
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: app/frontend
+        run: npx cypress run
+
+  # Step 2: Push Dev to Staging
+  push-to-staging:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configure git user
+      - name: Configure git user
+        run: |
+          git config --global user.name "Jules1109"
+          git config --global user.email "jules-edaourd.abouem-dickoum@efrei.net"
+
+      # Merge staging into dev to avoid conflicts
+      - name: Merge staging into dev
+        run: |
+          git fetch origin
+          git merge origin/staging --no-edit --allow-unrelated-histories || true
+          git checkout --theirs . || true
+          git add .
+          git commit -m "Resolved conflicts during merge from staging to dev" || true
+
+      # Push the updated dev branch to staging
+      - name: Push to staging branch
+        run: git push origin dev:staging    
+
+  # Step 3: Build and Test on Staging
+  staging-tests:
+    if: startsWith(github.ref, 'refs/heads/staging')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install backend dependencies
+        working-directory: app/backend
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install  -r requirements.txt  
+
+      - name: Start API server 
+        working-directory: app/backend
+        run:  |
+          source .venv/bin/activate
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+        env:
+          BASE_URL: http://127.0.0.1:8000  
+
+      # Set up Python and run all tests
+      - name: Run all tests
+        working-directory: app/backend
+        run: |
+          source .venv/bin/activate
+          pytest ../../tests/test_api.py
+        env:
+          BASE_URL: http://127.0.0.1:8000  
+
+      # Install Node.js for Cypress tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install Cypress dependencies
+      - name: Install frontend dependencies
+        working-directory: app/frontend
+        run: npm install
+
+      - name: start frontend server 
+        working-directory: app/frontend
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000  
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: app/frontend
+        run: npx cypress run
+
+  # Step 4: Deploy on Main
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+
+      # Push Docker image to DockerHub
+      - name: Build and push backend
+        working-directory: app/backend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_backend:latest
+       
+      - name: Build and push frontend
+        working-directory: app/frontend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/carbon_pred_frontend:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/carbon_pred_frontend:latest 
+   
+
+      # Deploy to production
+      - name: Deploy to production
+        run: |
+          echo "Deploying to cloud platform (e.g., AWS, GCP, Azure, etc.)"

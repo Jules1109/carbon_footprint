@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/carbon_footprint/static/css/main.da09b1dc.css",
+    "main.js": "/carbon_footprint/static/js/main.9514d478.js",
+    "static/js/488.e75445ad.chunk.js": "/carbon_footprint/static/js/488.e75445ad.chunk.js",
+    "index.html": "/carbon_footprint/index.html",
+    "main.da09b1dc.css.map": "/carbon_footprint/static/css/main.da09b1dc.css.map",
+    "main.9514d478.js.map": "/carbon_footprint/static/js/main.9514d478.js.map",
+    "488.e75445ad.chunk.js.map": "/carbon_footprint/static/js/488.e75445ad.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.da09b1dc.css",
+    "static/js/main.9514d478.js"
+  ]
+}
