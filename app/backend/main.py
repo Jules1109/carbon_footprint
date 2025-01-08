@@ -23,7 +23,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://excessive-briny-mlprod-94df4c93.koyeb.app"],
+    allow_origins=["https://jules1109.github.io/carbon_footprint/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
